@@ -1,0 +1,1 @@
+module.exports = { "/": { target: "http://localhost:4200", secure: false, bypass: function (req, res) { res.setHeader("Cross-Origin-Opener-Policy", "same-origin"); res.setHeader("Cross-Origin-Embedder-Policy", "require-corp"); } } }; 
