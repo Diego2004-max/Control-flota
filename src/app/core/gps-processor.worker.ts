@@ -1,19 +1,25 @@
 /// <reference lib="webworker" />
+import { SpatialGrid } from './spatial-grid';
+import { MapMatcher } from './map-matcher';
 
 let syncArray: Int32Array;
 let floatView: Float64Array;
+const spatialGrid = new SpatialGrid();
+const mapMatcher = new MapMatcher();
 
 addEventListener('message', ({ data }) => {
   if (data.buffer) {
     syncArray = new Int32Array(data.buffer);
     floatView = new Float64Array(data.buffer);
-    console.log("Worker: Búfer de datos vinculado correctamente.");
+    
+    // Insertamos segmentos de prueba simulando el centro histórico
+    spatialGrid.insertSegment({ id: 'seg-1', routeId: 'R07', p1: { lat: 1.213, lng: -77.281 }, p2: { lat: 1.215, lng: -77.283 } });
+
     startSimulation();
   }
 });
 
 function startSimulation() {
-  // Inicializamos posiciones aleatorias dentro del canvas (800x600)
   const buses = Array.from({ length: 310 }, (_, i) => ({
     id: i,
     x: Math.random() * 750 + 25,
@@ -22,25 +28,25 @@ function startSimulation() {
     vy: (Math.random() - 0.5) * 2
   }));
 
-  // Actualizamos a ~31 mensajes por segundo (32ms)
   setInterval(() => {
     if (!floatView) return;
 
     for (let i = 0; i < 310; i++) {
       const bus = buses[i];
-      
-      // Movimiento fluido simulado
       bus.x += bus.vx;
       bus.y += bus.vy;
 
-      // Rebote en los bordes del canvas (800x600)
       if (bus.x < 10 || bus.x > 790) bus.vx *= -1;
       if (bus.y < 10 || bus.y > 590) bus.vy *= -1;
 
+      // Aplicamos el filtro de coherencia del Map Matcher
+      const rawPoint = { lat: 1.21 + (bus.y / 100000), lng: -77.28 + (bus.x / 100000) };
+      const matched = mapMatcher.matchPosition(bus.id, rawPoint, spatialGrid.getCandidates(rawPoint.lat, rawPoint.lng));
+
       const offset = 1 + (i * 5);
       floatView[offset] = bus.id;
-      floatView[offset + 1] = bus.x; // Guardamos X directamente
-      floatView[offset + 2] = bus.y; // Guardamos Y directamente
+      floatView[offset + 1] = bus.x;
+      floatView[offset + 2] = bus.y;
     }
 
     if (syncArray) {

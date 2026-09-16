@@ -37,7 +37,7 @@ export class AppComponent implements AfterViewInit {
     // 3. Dibujamos texto estático de comprobación para verificar que el Canvas pinta
     this.ctx.fillStyle = '#38bdf8';
     this.ctx.font = 'bold 14px sans-serif';
-    this.ctx.fillText('⚡ CANVAS ACTIVO: Renderizando Flota en Vivo', 20, 30);
+    this.ctx.fillText('CANVAS ACTIVO: Renderizando Flota en Vivo', 20, 30);
 
     // 4. Obtenemos la vista de memoria del servicio
     const data = this.fleetMemory.floatView;

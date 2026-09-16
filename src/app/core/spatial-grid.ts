@@ -12,9 +12,9 @@ export interface Segment {
 
 export class SpatialGrid {
   private grid: Map<string, Segment[]> = new Map();
-  private cellSize: number; 
+  private cellSize: number;
 
-  constructor(cellSize: number = 0.00045) {
+  constructor(cellSize: number = 0.00045) { // Celda equivalente a ~50 metros
     this.cellSize = cellSize;
   }
 
